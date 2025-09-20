@@ -1,197 +1,205 @@
-from __future__ import print_function
+# 🐦 Flappy Bird NEAT AI
 
-import copy
-import warnings
+Game Flappy Bird với AI tự học sử dụng thuật toán NEAT (NeuroEvolution of Augmenting Topologies) để train neural network chơi game.
 
-import graphviz
-import matplotlib.pyplot as plt
-import numpy as np
+![Python](https://img.shields.io/badge/Python-3.12-blue?logo=python)
+![Pygame](https://img.shields.io/badge/Pygame-2.6-green?logo=pygame)
+![NEAT](https://img.shields.io/badge/NEAT-AI-orange)
+![License](https://img.shields.io/badge/License-MIT-yellow)
 
+## 🎯 Tính năng
 
-def plot_stats(statistics, ylog=False, view=False, filename='avg_fitness.svg'):
-    """ Plots the population's average and best fitness. """
-    if plt is None:
-        warnings.warn("This display is not available due to a missing optional dependency (matplotlib)")
-        return
+- ✅ Game Flappy Bird hoàn chỉnh với pygame
+- 🧠 AI tự học chơi game bằng NEAT algorithm  
+- 📊 Visualization training process và network
+- 🎮 Pixel-perfect collision detection
+- 📈 Tracking fitness scores qua các generation
+- 🔄 Population evolution với genetic algorithm
 
-    generation = range(len(statistics.most_fit_genomes))
-    best_fitness = [c.fitness for c in statistics.most_fit_genomes]
-    avg_fitness = np.array(statistics.get_fitness_mean())
-    stdev_fitness = np.array(statistics.get_fitness_stdev())
+## 🛠️ Tech Stack
 
-    plt.plot(generation, avg_fitness, 'b-', label="average")
-    plt.plot(generation, avg_fitness - stdev_fitness, 'g-.', label="-1 sd")
-    plt.plot(generation, avg_fitness + stdev_fitness, 'g-.', label="+1 sd")
-    plt.plot(generation, best_fitness, 'r-', label="best")
+- **Python 3.12+** - Ngôn ngữ lập trình chính
+- **Pygame 2.6+** - Game development framework
+- **NEAT-Python** - NeuroEvolution library
+- **NumPy** - Numerical computing
+- **Matplotlib** - Data visualization & plotting
+- **Graphviz** - Network topology visualization
 
-    plt.title("Population's average and best fitness")
-    plt.xlabel("Generations")
-    plt.ylabel("Fitness")
-    plt.grid()
-    plt.legend(loc="best")
-    if ylog:
-        plt.gca().set_yscale('symlog')
+## 📁 Cấu trúc Project
 
-    plt.savefig(filename)
-    if view:
-        plt.show()
+```
+flappy-bird-neat/
+├── game/
+│   ├── src/
+│   │   └── flappy_bird.py      # Main game file với NEAT integration
+│   ├── imgs/                   # Game assets (bird, pipe, background)
+│   │   ├── bird1.png
+│   │   ├── bird2.png  
+│   │   ├── bird3.png
+│   │   ├── pipe.png
+│   │   ├── bg.png
+│   │   └── base.png
+│   └── visualize.py            # Visualization utilities
+├── config-feedforward.txt     # NEAT configuration
+├── requirements.txt           # Python dependencies
+├── .gitignore                # Git ignore rules
+└── README.md                 # Documentation
+```
 
-    plt.close()
+## 🚀 Installation & Setup
 
+### 1. Clone Repository
+```bash
+git clone https://github.com/LeVietThanh1412/flappy-bird-neat.git
+cd flappy-bird-neat
+```
 
-def plot_spikes(spikes, view=False, filename=None, title=None):
-    """ Plots the trains for a single spiking neuron. """
-    t_values = [t for t, I, v, u, f in spikes]
-    v_values = [v for t, I, v, u, f in spikes]
-    u_values = [u for t, I, v, u, f in spikes]
-    I_values = [I for t, I, v, u, f in spikes]
-    f_values = [f for t, I, v, u, f in spikes]
+### 2. Tạo Virtual Environment
+```bash
+python -m venv flappy
+source flappy/bin/activate  # Linux/Mac
+# hoặc
+flappy\Scripts\activate     # Windows
+```
 
-    fig = plt.figure()
-    plt.subplot(4, 1, 1)
-    plt.ylabel("Potential (mv)")
-    plt.xlabel("Time (in ms)")
-    plt.grid()
-    plt.plot(t_values, v_values, "g-")
+### 3. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
 
-    if title is None:
-        plt.title("Izhikevich's spiking neuron model")
-    else:
-        plt.title("Izhikevich's spiking neuron model ({0!s})".format(title))
+### 4. Tạo Game Assets (nếu chưa có)
+```bash
+python create_images.py
+```
 
-    plt.subplot(4, 1, 2)
-    plt.ylabel("Fired")
-    plt.xlabel("Time (in ms)")
-    plt.grid()
-    plt.plot(t_values, f_values, "r-")
+## 🎮 Cách chạy
 
-    plt.subplot(4, 1, 3)
-    plt.ylabel("Recovery (u)")
-    plt.xlabel("Time (in ms)")
-    plt.grid()
-    plt.plot(t_values, u_values, "r-")
+### Chạy AI Training
+```bash
+cd flappy-bird-neat
+python game/src/flappy_bird.py
+```
 
-    plt.subplot(4, 1, 4)
-    plt.ylabel("Current (I)")
-    plt.xlabel("Time (in ms)")
-    plt.grid()
-    plt.plot(t_values, I_values, "r-o")
+### Thông số Training
+- **Population Size**: 100 birds mỗi generation
+- **Max Generations**: 50 
+- **Fitness Function**: Thời gian sống + bonus vượt pipe
+- **Neural Network**: 3 inputs → hidden nodes → 1 output
+- **Selection**: Tournament selection với elitism
 
-    if filename is not None:
-        plt.savefig(filename)
+## 🧠 NEAT Algorithm
 
-    if view:
-        plt.show()
-        plt.close()
-        fig = None
+### Input Nodes (3):
+1. **Bird Y Position** - Vị trí bird trên màn hình
+2. **Distance to Top Pipe** - Khoảng cách đến pipe trên
+3. **Distance to Bottom Pipe** - Khoảng cách đến pipe dưới
 
-    return fig
+### Output Node (1):
+- **Jump Decision** - Output > 0.5 → bird nhảy
 
+### Fitness Function:
+```python
+fitness = time_alive * 0.1 + pipes_passed * 5 - collision_penalty
+```
 
-def plot_species(statistics, view=False, filename='speciation.svg'):
-    """ Visualizes speciation throughout evolution. """
-    if plt is None:
-        warnings.warn("This display is not available due to a missing optional dependency (matplotlib)")
-        return
+## 📊 Monitoring Training
 
-    species_sizes = statistics.get_species_sizes()
-    num_generations = len(species_sizes)
-    curves = np.array(species_sizes).T
+Game hiển thị real-time:
+- **Score**: Số pipe đã vượt qua
+- **Generation**: Generation hiện tại  
+- **Alive**: Số bird còn sống
+- **Lines** (optional): Neural network decision lines
 
-    fig, ax = plt.subplots()
-    ax.stackplot(range(num_generations), *curves)
+## ⚙️ Configuration
 
-    plt.title("Speciation")
-    plt.ylabel("Size per Species")
-    plt.xlabel("Generations")
+File `config-feedforward.txt` chứa các thông số NEAT:
 
-    plt.savefig(filename)
+```ini
+[NEAT]
+fitness_criterion     = max
+fitness_threshold     = 100
+pop_size              = 100
+reset_on_extinction   = False
 
-    if view:
-        plt.show()
+[DefaultGenome]
+# Network parameters
+num_inputs              = 3
+num_outputs             = 1
+initial_connection      = full_direct
+feed_forward            = True
+```
 
-    plt.close()
+## 🔧 Customization
 
+### Thay đổi khó độ game:
+```python
+# Trong flappy_bird.py
+class Pipe:
+    GAP = 200    # Khoảng cách giữa 2 pipe (càng nhỏ càng khó)
+    VEL = 5      # Tốc độ pipe (càng lớn càng khó)
+```
 
-def draw_net(config, genome, view=False, filename=None, node_names=None, show_disabled=True, prune_unused=False,
-             node_colors=None, fmt='svg'):
-    """ Receives a genome and draws a neural network with arbitrary topology. """
-    # Attributes for network nodes.
-    if graphviz is None:
-        warnings.warn("This display is not available due to a missing optional dependency (graphviz)")
-        return
+### Thay đổi bird physics:
+```python
+class Bird:
+    MAX_ROTATION = 25    # Góc xoay tối đa
+    ROT_VEL = 20        # Tốc độ xoay
+    ANIMATION_TIME = 5   # Tốc độ animation
+```
 
-    if node_names is None:
-        node_names = {}
+## 📈 Kết quả Training
 
-    assert type(node_names) is dict
+Thường sau 10-20 generations:
+- Birds học được cách tránh pipe cơ bản
+- Fitness score tăng dần đều
+- Xuất hiện những bird có thể vượt 10+ pipes
 
-    if node_colors is None:
-        node_colors = {}
+Sau 30-50 generations:
+- AI có thể chơi indefinitely
+- Neural network tối ưu topology
+- Consistent high scores
 
-    assert type(node_colors) is dict
+## 🐛 Troubleshooting
 
-    node_attrs = {
-        'shape': 'circle',
-        'fontsize': '9',
-        'height': '0.2',
-        'width': '0.2'}
+### Lỗi không tìm thấy images:
+```bash
+mkdir -p game/imgs
+python create_images.py
+```
 
-    dot = graphviz.Digraph(format=fmt, node_attr=node_attrs)
+### Lỗi import modules:
+```bash
+pip install --upgrade pip
+pip install -r requirements.txt
+```
 
-    inputs = set()
-    for k in config.genome_config.input_keys:
-        inputs.add(k)
-        name = node_names.get(k, str(k))
-        input_attrs = {'style': 'filled', 'shape': 'box', 'fillcolor': node_colors.get(k, 'lightgray')}
-        dot.node(name, _attributes=input_attrs)
+### Performance issues:
+- Giảm `pop_size` trong config
+- Tắt visualization (`DRAW_LINES = False`)
+- Giảm FPS (`clock.tick(30)` → `clock.tick(60)`)
 
-    outputs = set()
-    for k in config.genome_config.output_keys:
-        outputs.add(k)
-        name = node_names.get(k, str(k))
-        node_attrs = {'style': 'filled', 'fillcolor': node_colors.get(k, 'lightblue')}
+## 📚 Tài liệu tham khảo
 
-        dot.node(name, _attributes=node_attrs)
+- [NEAT-Python Documentation](https://neat-python.readthedocs.io/)
+- [Pygame Documentation](https://www.pygame.org/docs/)
+- [NEAT Algorithm Paper](http://nn.cs.utexas.edu/downloads/papers/stanley.ec02.pdf)
 
-    if prune_unused:
-        connections = set()
-        for cg in genome.connections.values():
-            if cg.enabled or show_disabled:
-                connections.add((cg.in_node_id, cg.out_node_id))
+## 🤝 Contributing
 
-        used_nodes = copy.copy(outputs)
-        pending = copy.copy(outputs)
-        while pending:
-            new_pending = set()
-            for a, b in connections:
-                if b in pending and a not in used_nodes:
-                    new_pending.add(a)
-                    used_nodes.add(a)
-            pending = new_pending
-    else:
-        used_nodes = set(genome.nodes.keys())
+1. Fork repository
+2. Tạo feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
 
-    for n in used_nodes:
-        if n in inputs or n in outputs:
-            continue
+## 📝 License
 
-        attrs = {'style': 'filled',
-                 'fillcolor': node_colors.get(n, 'white')}
-        dot.node(str(n), _attributes=attrs)
+Project này sử dụng MIT License. Xem file `LICENSE` để biết thêm chi tiết.
 
-    for cg in genome.connections.values():
-        if cg.enabled or show_disabled:
-            #if cg.input not in used_nodes or cg.output not in used_nodes:
-            #    continue
-            input, output = cg.key
-            a = node_names.get(input, str(input))
-            b = node_names.get(output, str(output))
-            style = 'solid' if cg.enabled else 'dotted'
-            color = 'green' if cg.weight > 0 else 'red'
-            width = str(0.1 + abs(cg.weight / 5.0))
-            dot.edge(a, b, _attributes={'style': style, 'color': color, 'penwidth': width})
+## 👨‍💻 Author
 
-    dot.render(filename, view=view)
+**Lê Việt Thành** - [@LeVietThanh1412](https://github.com/LeVietThanh1412)
 
-    return dot
+---
+
+⭐ Star repo nếu project hữu ích cho bạn!
