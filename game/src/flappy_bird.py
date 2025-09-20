@@ -7,10 +7,17 @@ import random
 WIN_WIDTH = 600
 WIN_HEIGHT = 800
 
-BIRD_IMGS = [pygame.transform.scale2x(pygame.image.load(os.path.join("imgs","bird1.png")))], [pygame.transform.scale2x(pygame.image.load(os.path.join("imgs","bird2.png")))], [pygame.transform.scale2x(pygame.image.load(os.path.join("imgs","bird3.png")))]
-PIPE_IMG = pygame.transform.scale2x(pygame.image.load(os.path.join("imgs","pipe.png")))
-BASE_IMG = pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "base.png")))
-BG_IMG = pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "bg.png")))
+# Lấy đường dẫn thư mục hiện tại của file
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+IMG_DIR = os.path.join(BASE_DIR, "..", "imgs")  # Đi lên 1 cấp để tìm thư mục imgs
+BIRD_IMGS = [
+    pygame.transform.scale2x(pygame.image.load(os.path.join(IMG_DIR, "bird1.png"))),
+    pygame.transform.scale2x(pygame.image.load(os.path.join(IMG_DIR, "bird2.png"))),
+    pygame.transform.scale2x(pygame.image.load(os.path.join(IMG_DIR, "bird3.png")))
+]
+PIPE_IMG = pygame.transform.scale2x(pygame.image.load(os.path.join(IMG_DIR, "pipe.png")))
+BASE_IMG = pygame.transform.scale2x(pygame.image.load(os.path.join(IMG_DIR, "base.png")))
+BG_IMG = pygame.transform.scale2x(pygame.image.load(os.path.join(IMG_DIR, "bg.png")))
 
 class Bird:
     IMGS = BIRD_IMGS
@@ -74,6 +81,29 @@ class Bird:
         rotated_image = pygame.transform.rotate(self.img, self.tilt)
         new_rect = rotated_image.get_rect(center=self.img.get_rect(topleft=(self.x, self.y)).center)
         win.blit(rotated_image, new_rect.topleft)
-
+    
     def get_mask(self):
         return pygame.mask.from_surface(self.img)
+
+def draw_window(win, bird):
+    win.blit(BG_IMG, (0,0))
+    bird.draw(win)
+    pygame.display.update()
+    
+def main():
+    bird = Bird(200,300)
+    win = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
+    pygame.display.set_caption("Flappy Bird")
+    clock = pygame.time.Clock()
+    
+    run = True
+    while run:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+        draw_window(win, bird)
+    pygame.quit()
+    quit()
+    
+if __name__ == "__main__":
+    main()
