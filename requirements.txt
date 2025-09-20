@@ -1,0 +1,5 @@
+neat-python>=0.92
+pygame>=2.5.2
+numpy>=1.26
+matplotlib>=3.9
+tqdm>=4.66

@@ -1,0 +1,15 @@
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+.env/
+
+# Python virtual environments
+pyvenv.cfg
+pip-selfcheck.json
+
+# Alternative virtual environment names
+myenv/
+virtualenv/
+flappy/
