@@ -180,7 +180,7 @@ def eval_genomes(genomes, config):
     birds = []
     ge = []
     for genome_id, genome in genomes:
-        genome.fitness = 0
+        genome.fitness = 10  # Cho điểm khởi đầu thay vì 0
         net = neat.nn.FeedForwardNetwork.create(genome, config)
         nets.append(net)
         birds.append(Bird(230,350))
@@ -205,6 +205,12 @@ def eval_genomes(genomes, config):
         for x, bird in enumerate(birds):
             ge[x].fitness += 0.1
             bird.move()
+            
+            # Thêm reward cho việc giữ khoảng cách tốt
+            distance_to_center = abs(bird.y - (pipes[pipe_ind].height + pipes[pipe_ind].GAP/2))
+            if distance_to_center < pipes[pipe_ind].GAP/3:  # Ở giữa khoảng trống
+                ge[x].fitness += 0.2
+            
             output = nets[birds.index(bird)].activate((bird.y, abs(bird.y - pipes[pipe_ind].height), abs(bird.y - pipes[pipe_ind].bottom)))
             if output[0] > 0.5:
                 bird.jump()
@@ -215,7 +221,7 @@ def eval_genomes(genomes, config):
             pipe.move()
             for bird in birds:
                 if pipe.collide(bird, win):
-                    ge[birds.index(bird)].fitness -= 1
+                    ge[birds.index(bird)].fitness -= 0.5
                     nets.pop(birds.index(bird))
                     ge.pop(birds.index(bird))
                     birds.pop(birds.index(bird))
