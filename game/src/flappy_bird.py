@@ -191,7 +191,7 @@ def eval_genomes(genomes, config):
     clock = pygame.time.Clock()
     run = True
     while run and len(birds) > 0:
-        clock.tick(30)
+        clock.tick(45)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
